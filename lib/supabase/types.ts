@@ -28,6 +28,7 @@ export interface Database {
           ats_type: AtsType;
         };
         Update: Partial<Database["public"]["Tables"]["companies"]["Row"]>;
+        Relationships: [];
       };
       jobs: {
         Row: {
@@ -68,6 +69,7 @@ export interface Database {
           external_id: string;
         };
         Update: Partial<Database["public"]["Tables"]["jobs"]["Row"]>;
+        Relationships: [];
       };
       subscribers: {
         Row: {
@@ -83,6 +85,7 @@ export interface Database {
           email: string;
         };
         Update: Partial<Database["public"]["Tables"]["subscribers"]["Row"]>;
+        Relationships: [];
       };
       orders: {
         Row: {
@@ -103,6 +106,7 @@ export interface Database {
           product: ProductType;
         };
         Update: Partial<Database["public"]["Tables"]["orders"]["Row"]>;
+        Relationships: [];
       };
       import_runs: {
         Row: {
@@ -120,7 +124,12 @@ export interface Database {
           source: string;
         };
         Update: Partial<Database["public"]["Tables"]["import_runs"]["Row"]>;
+        Relationships: [];
       };
     };
+    Views: Record<string, never>;
+    Functions: Record<string, never>;
+    Enums: Record<string, never>;
+    CompositeTypes: Record<string, never>;
   };
 }
