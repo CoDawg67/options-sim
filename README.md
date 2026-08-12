@@ -1,89 +1,107 @@
-# Options Trading Simulator
+# MLOps Jobs — automated niche job board
 
-Paper trading options with real market data. Supports naked calls/puts, covered calls, cash-secured puts, and everything in between.
+Niche: **MLOps / ML Infrastructure Engineering**. Zero-runtime-AI, free-tier-only
+job board: pulls jobs from public ATS feeds on a schedule, publishes SEO pages,
+emails subscribers, and sells listings via Stripe — hands-off after setup.
 
-## What it does
+Domain is a placeholder (`mlopsjobs.example.com` in `config/site.ts` and
+`NEXT_PUBLIC_SITE_URL`) until a real one is bought on Namecheap. Swap both
+before launch.
 
-- Pulls real options chains from Yahoo Finance (free, 15-min delayed)
-- $100,000 starting paper balance
-- Place any options trade: long/short calls, long/short puts, covered calls, cash-secured puts
-- **Real Reg T margin calculations** for naked options — you'll see exactly what buying power a naked call eats
-- Live P&L tracking as prices move
-- Complete trade history
-- Accessible from computer AND iPad/phone (same network)
+## Stack
 
-## Setup on your iMac
+Next.js (App Router, TypeScript, Tailwind) · Supabase (Postgres) · Stripe ·
+Resend · Clerk (optional employer accounts) · PostHog · Sentry · Vercel Cron +
+Upstash QStash.
 
-Open Terminal and run these commands one at a time:
+## Local development
 
 ```bash
-# 1. Put the files somewhere permanent (Desktop is fine)
-cd ~/Desktop
-mkdir options_sim
-# (Copy server.py, index.html, requirements.txt into this folder)
-
-cd ~/Desktop/options_sim
-
-# 2. Install the Python packages
-pip3 install -r requirements.txt --break-system-packages
-
-# 3. Run the server
-python3 server.py
+npm install
+cp .env.example .env.local   # fill in keys, see table below
+npm run dev
 ```
 
-If `pip3` isn't found, try `pip install -r requirements.txt --break-system-packages`.
+## Accounts to create and where each key goes
 
-## Using it
+All of these have free tiers that cover this project's scale. Create each
+account, then paste the key into `.env.local` (local dev) **and** the Vercel
+project's Environment Variables (production) — the two are separate.
 
-**On your computer (same iMac):**
-Open Safari/Chrome and go to: `http://localhost:5055`
+| Env var | Where to get it |
+|---|---|
+| `NEXT_PUBLIC_SITE_URL` | The domain you buy, e.g. `https://mlopsjobs.com`. Use the placeholder until then. |
+| `NEXT_PUBLIC_SUPABASE_URL` | [supabase.com](https://supabase.com) → New project → Project Settings → API → Project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Same page → API keys → `anon` `public` |
+| `SUPABASE_SERVICE_ROLE_KEY` | Same page → API keys → `service_role` (secret — server/cron only, never ships to the browser) |
+| `STRIPE_SECRET_KEY` | [dashboard.stripe.com](https://dashboard.stripe.com) → Developers → API keys → Secret key. Use the **test mode** key until Phase 5 launch. |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Same page → Publishable key |
+| `STRIPE_WEBHOOK_SECRET` | Developers → Webhooks → Add endpoint → `https://<domain>/api/webhooks/stripe`, event `checkout.session.completed` → Signing secret |
+| `RESEND_API_KEY` | [resend.com](https://resend.com) → API Keys → Create (free tier: 3,000 emails/mo, 100/day) |
+| `RESEND_FROM_EMAIL` | An address on a domain you've verified in Resend (Domains tab) |
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` / `CLERK_SECRET_KEY` | [clerk.com](https://clerk.com) → Create application → API Keys |
+| `NEXT_PUBLIC_POSTHOG_KEY` / `NEXT_PUBLIC_POSTHOG_HOST` | [posthog.com](https://posthog.com) → Project settings → Project API key |
+| `NEXT_PUBLIC_SENTRY_DSN` | [sentry.io](https://sentry.io) → Create project (Next.js) → DSN |
+| `SENTRY_AUTH_TOKEN` / `SENTRY_ORG` / `SENTRY_PROJECT` | Sentry → Settings → Auth Tokens (for source-map upload at build time) |
+| `USAJOBS_API_KEY` / `USAJOBS_USER_AGENT` | Only if the niche later includes gov roles. [developer.usajobs.gov](https://developer.usajobs.gov) → free key emailed to you; `USER_AGENT` is the email you registered with. |
+| `CRON_SECRET` | Any random string you generate (`openssl rand -hex 32`). Cron/webhook routes check this so the endpoints can't be triggered publicly. |
+| `QSTASH_*` | [upstash.com](https://upstash.com) → QStash tab → used for the every-6-hours import job (see below) |
 
-**On your iPad or iPhone (same WiFi network):**
+**Not in `.env`:** the Namecheap domain purchase and Cloudflare DNS records —
+see below.
 
-1. Find your iMac's IP address. In Terminal run: `ipconfig getifaddr en0`
-2. On your iPad/iPhone, open Safari and go to: `http://[that IP]:5055`
-   Example: `http://192.168.1.69:5055`
-3. Tap the Share button in Safari → "Add to Home Screen" → now it opens like an app
+## Scheduling note (free-tier constraint)
 
-## How to place trades
+Vercel's Hobby (free) plan only allows Cron Jobs to run **once per day**, so
+the brief's "import every 6 hours" doesn't fit Vercel Cron directly. This repo
+uses:
 
-**Buy/sell options (any strategy):**
-1. Go to the Trade tab
-2. Type a symbol (SPY, AAPL, TSLA, etc.) and tap Load
-3. Pick an expiration from the dropdown
-4. The options chain appears — calls on the left, puts on the right, strike price in the middle
-5. Tap any bid or ask price to open a trade ticket
-6. Toggle Buy-to-Open (long) or Sell-to-Open (short/naked)
-7. Enter contracts and price, review details (including margin for naked trades), place the order
+- **Vercel Cron** (`vercel.json`) for the daily expiry sweep (`/api/cron/expire`,
+  3am UTC) and the weekly digest (`/api/cron/digest`, Mondays).
+- **Upstash QStash** (free tier) for the every-6-hours import job
+  (`/api/cron/import`). In the QStash console, create a schedule with cron
+  `0 */6 * * *` targeting `https://<domain>/api/cron/import`, and set the
+  `Upstash-Signature` verification per their Next.js guide. This comfortably
+  fits QStash's free quota (4 calls/day against a much larger free allowance).
 
-**Covered calls:**
-1. First buy 100 shares in the Stock panel
-2. Then sell-to-open a call at your chosen strike
-3. The system knows you own the shares (covered) so no naked margin applies
+## Deploying
 
-**Cash-secured puts:**
-1. Just sell-to-open a put
-2. Margin is held equal to the assignment cost
+1. Push this repo to GitHub.
+2. [vercel.com/new](https://vercel.com/new) → import the repo → it auto-detects
+   Next.js. Paste all env vars from the table above into the Vercel project
+   (Settings → Environment Variables) before the first deploy.
+3. Every push to `main` auto-deploys.
 
-**Spreads:**
-Place each leg as a separate trade with the same expiration. Manage each leg individually.
+## Pointing the domain (Namecheap → Cloudflare → Vercel)
 
-## Key things this simulator teaches you
+1. Buy the domain on Namecheap.
+2. Add the site to Cloudflare (free plan) — Cloudflare gives you two
+   nameservers, e.g. `ns1.cloudflare.com` and `ns2.cloudflare.com` (yours will
+   be specific to your zone, shown in the Cloudflare dashboard after you add
+   the site).
+3. In Namecheap: Domain List → Manage → Nameservers → **Custom DNS** → paste
+   the two Cloudflare nameservers. Propagation takes up to 24h.
+4. In Vercel: Project → Settings → Domains → add your domain. Vercel will show
+   the records it needs — typically:
+   - `A` record: `@` → `76.76.21.21`
+   - `CNAME` record: `www` → `cname.vercel-dns.com`
+5. Add those exact records in Cloudflare DNS (proxy status **DNS only**, the
+   grey cloud, not orange — Vercel needs to see the real IP for SSL
+   provisioning). Once Vercel shows the domain as "Valid", flip Cloudflare's
+   proxy back to orange-cloud if you want its CDN/WAF in front.
 
-- **Strike selection** — which strikes have the best premium vs. risk
-- **IV impact** — high IV = fatter premiums but more movement
-- **Time decay (theta)** — short options gain from it, long options bleed
-- **Assignment risk** — what happens when short options go in-the-money
-- **Margin reality** — naked calls tie up huge buying power, covered calls don't
-- **Max loss scenarios** — naked calls have unlimited risk (the simulator reminds you)
+## Project layout
 
-## Accuracy notes
+```
+app/            Next.js App Router pages + API routes (cron, webhooks)
+config/         site.ts (pricing, niche, target roles), keywords.ts (rule-based role/location matching)
+lib/            Supabase clients (browser/server/admin), importer + email helpers
+supabase/migrations/   SQL schema, checked into the repo
+scripts/        one-off scripts (seeding companies, etc.)
+```
 
-- Quotes are 15-min delayed from Yahoo. For learning strategy, this is fine.
-- Fills happen at the price you specify (no bid/ask slippage simulated).
-- Assignment at expiration is not auto-simulated yet — close positions manually before expiration to lock in P&L.
-- Margin formula is Reg T standard. Brokers sometimes use portfolio margin which is more complex.
+## Status
 
-## Reset
-
-Settings tab → Reset Account. Clears everything, fresh $100k.
+Phase 0 (this commit): project scaffolded, builds cleanly, env documented.
+Database schema, importers, SEO pages, email, and Stripe checkout land in
+subsequent phases — see the task list in the build conversation.
