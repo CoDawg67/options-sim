@@ -60,9 +60,13 @@ uses:
   3am UTC) and the weekly digest (`/api/cron/digest`, Mondays).
 - **Upstash QStash** (free tier) for the every-6-hours import job
   (`/api/cron/import`). In the QStash console, create a schedule with cron
-  `0 */6 * * *` targeting `https://<domain>/api/cron/import`, and set the
-  `Upstash-Signature` verification per their Next.js guide. This comfortably
-  fits QStash's free quota (4 calls/day against a much larger free allowance).
+  `0 */6 * * *` targeting `https://<domain>/api/cron/import`, method POST. The
+  route verifies the `Upstash-Signature` header against
+  `QSTASH_CURRENT_SIGNING_KEY`/`QSTASH_NEXT_SIGNING_KEY` (`lib/qstash.ts`), so
+  no extra header is required — but you can still add `x-cron-secret:
+  <CRON_SECRET>` as a schedule header for a manual-testing fallback. This
+  comfortably fits QStash's free quota (4 calls/day against a much larger
+  free allowance).
 
 ## Deploying
 

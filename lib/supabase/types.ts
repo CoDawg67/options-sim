@@ -6,6 +6,7 @@ export type AtsType = "greenhouse" | "lever" | "ashby" | "workable" | "manual";
 export type RemoteType = "onsite" | "hybrid" | "remote";
 export type ProductType = "listing" | "featured";
 export type OrderStatus = "pending" | "paid" | "failed" | "refunded";
+export type OutreachStatus = "drafted" | "sent" | "replied" | "skipped";
 
 export interface Database {
   public: {
@@ -97,6 +98,7 @@ export interface Database {
           amount_cents: number;
           product: ProductType;
           status: OrderStatus;
+          is_founding_member: boolean;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["orders"]["Row"]> & {
@@ -106,6 +108,47 @@ export interface Database {
           product: ProductType;
         };
         Update: Partial<Database["public"]["Tables"]["orders"]["Row"]>;
+        Relationships: [];
+      };
+      outreach: {
+        Row: {
+          id: string;
+          company_id: string;
+          job_id: string | null;
+          contact_email: string | null;
+          status: OutreachStatus;
+          draft_subject: string;
+          draft_body: string;
+          sent_at: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["outreach"]["Row"]> & {
+          company_id: string;
+          draft_subject: string;
+          draft_body: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["outreach"]["Row"]>;
+        Relationships: [];
+      };
+      search_console_snapshots: {
+        Row: {
+          id: string;
+          captured_at: string;
+          period_start: string;
+          period_end: string;
+          clicks: number;
+          impressions: number;
+          average_position: number | null;
+          indexed_page_count: number | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["search_console_snapshots"]["Row"]> & {
+          period_start: string;
+          period_end: string;
+          clicks: number;
+          impressions: number;
+        };
+        Update: Partial<Database["public"]["Tables"]["search_console_snapshots"]["Row"]>;
         Relationships: [];
       };
       import_runs: {

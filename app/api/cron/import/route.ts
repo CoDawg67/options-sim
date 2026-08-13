@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAuthorizedByCustomSecretHeader, isAuthorizedCronRequest } from "@/lib/cron-auth";
+import { verifyQstashSignature } from "@/lib/qstash";
 import { runAllImports } from "@/lib/importers/run";
 
 // Triggered by Upstash QStash every 6 hours (see README — Vercel's free tier
@@ -7,7 +8,14 @@ import { runAllImports } from "@/lib/importers/run";
 export const maxDuration = 300;
 
 export async function POST(req: NextRequest) {
-  if (!isAuthorizedByCustomSecretHeader(req) && !isAuthorizedCronRequest(req)) {
+  const rawBody = await req.text();
+
+  const authorized =
+    (await verifyQstashSignature(req, rawBody)) ||
+    isAuthorizedByCustomSecretHeader(req) ||
+    isAuthorizedCronRequest(req);
+
+  if (!authorized) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
