@@ -12,10 +12,13 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^7.7.4",
+    "@sentry/nextjs": "^10.70.0",
     "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.112.3",
     "@upstash/qstash": "^2.11.3",
     "next": "16.3.0",
+    "posthog-js": "^1.416.0",
+    "posthog-node": "^5.48.2",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "resend": "^6.19.0",
