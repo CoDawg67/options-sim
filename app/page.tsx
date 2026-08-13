@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { siteConfig } from "@/config/site";
 import { getAllActiveJobs } from "@/lib/data/jobs";
 import { JobCard } from "@/components/JobCard";
@@ -33,20 +34,28 @@ export default async function HomePage({
 
   return (
     <main className="mx-auto flex max-w-3xl flex-1 flex-col gap-8 px-6 py-12">
-      <div>
-        <h1 className="text-3xl font-semibold tracking-tight">{siteConfig.name}</h1>
-        <p className="mt-2 text-neutral-500">{siteConfig.description}</p>
-        {subscribed === "confirmed" && (
-          <p className="mt-3 rounded-md bg-green-50 px-3 py-2 text-sm text-green-800 dark:bg-green-900/30 dark:text-green-300">
-            You&rsquo;re subscribed — new roles land in your inbox weekly.
-          </p>
-        )}
-        {unsubscribed === "done" && (
-          <p className="mt-3 rounded-md bg-neutral-100 px-3 py-2 text-sm text-neutral-600 dark:bg-neutral-800 dark:text-neutral-300">
-            You&rsquo;ve been unsubscribed.
-          </p>
-        )}
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-semibold tracking-tight">{siteConfig.name}</h1>
+          <p className="mt-2 text-neutral-500">{siteConfig.description}</p>
+        </div>
+        <Link
+          href="/post-a-job"
+          className="shrink-0 rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium whitespace-nowrap text-white dark:bg-white dark:text-neutral-900"
+        >
+          Post a job
+        </Link>
       </div>
+      {subscribed === "confirmed" && (
+        <p className="-mt-4 rounded-md bg-green-50 px-3 py-2 text-sm text-green-800 dark:bg-green-900/30 dark:text-green-300">
+          You&rsquo;re subscribed — new roles land in your inbox weekly.
+        </p>
+      )}
+      {unsubscribed === "done" && (
+        <p className="-mt-4 rounded-md bg-neutral-100 px-3 py-2 text-sm text-neutral-600 dark:bg-neutral-800 dark:text-neutral-300">
+          You&rsquo;ve been unsubscribed.
+        </p>
+      )}
 
       <form method="get" className="flex flex-wrap gap-3">
         <input

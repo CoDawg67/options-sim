@@ -4,6 +4,7 @@ import "./globals.css";
 import { siteConfig } from "@/config/site";
 import { PostHogProvider } from "@/components/PostHogProvider";
 import { SiteFooter } from "@/components/SiteFooter";
+import { ClerkAppProvider } from "@/components/ClerkAppProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,8 +29,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <PostHogProvider>{children}</PostHogProvider>
-        <SiteFooter />
+        <ClerkAppProvider>
+          <PostHogProvider>{children}</PostHogProvider>
+          <SiteFooter />
+        </ClerkAppProvider>
       </body>
     </html>
   );
