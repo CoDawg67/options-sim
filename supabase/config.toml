@@ -1,0 +1,8 @@
+# Minimal config for the Supabase CLI. Project ref is set after `supabase link`.
+project_id = "mlops-jobs"
+
+[db]
+port = 54322
+
+[api]
+port = 54321
