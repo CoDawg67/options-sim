@@ -8,6 +8,8 @@ interface HomeSearchParams {
   q?: string;
   remote?: string;
   city?: string;
+  subscribed?: string;
+  unsubscribed?: string;
 }
 
 export default async function HomePage({
@@ -15,7 +17,7 @@ export default async function HomePage({
 }: {
   searchParams: Promise<HomeSearchParams>;
 }) {
-  const { q, remote, city } = await searchParams;
+  const { q, remote, city, subscribed, unsubscribed } = await searchParams;
   const allJobs = await getAllActiveJobs();
 
   const jobs = allJobs.filter((job) => {
@@ -34,6 +36,16 @@ export default async function HomePage({
       <div>
         <h1 className="text-3xl font-semibold tracking-tight">{siteConfig.name}</h1>
         <p className="mt-2 text-neutral-500">{siteConfig.description}</p>
+        {subscribed === "confirmed" && (
+          <p className="mt-3 rounded-md bg-green-50 px-3 py-2 text-sm text-green-800 dark:bg-green-900/30 dark:text-green-300">
+            You&rsquo;re subscribed — new roles land in your inbox weekly.
+          </p>
+        )}
+        {unsubscribed === "done" && (
+          <p className="mt-3 rounded-md bg-neutral-100 px-3 py-2 text-sm text-neutral-600 dark:bg-neutral-800 dark:text-neutral-300">
+            You&rsquo;ve been unsubscribed.
+          </p>
+        )}
       </div>
 
       <form method="get" className="flex flex-wrap gap-3">

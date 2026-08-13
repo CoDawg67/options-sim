@@ -7,6 +7,7 @@ export type RemoteType = "onsite" | "hybrid" | "remote";
 export type ProductType = "listing" | "featured";
 export type OrderStatus = "pending" | "paid" | "failed" | "refunded";
 export type OutreachStatus = "drafted" | "sent" | "replied" | "skipped";
+export type EmailKind = "confirm" | "digest" | "outreach" | "employer_confirmation" | "ops_digest" | "admin_warning";
 
 export interface Database {
   public: {
@@ -149,6 +150,20 @@ export interface Database {
           impressions: number;
         };
         Update: Partial<Database["public"]["Tables"]["search_console_snapshots"]["Row"]>;
+        Relationships: [];
+      };
+      email_sends: {
+        Row: {
+          id: string;
+          kind: EmailKind;
+          recipient: string;
+          sent_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["email_sends"]["Row"]> & {
+          kind: EmailKind;
+          recipient: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["email_sends"]["Row"]>;
         Relationships: [];
       };
       import_runs: {
