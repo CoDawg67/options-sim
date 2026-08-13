@@ -28,6 +28,14 @@ export const titleExclude = [
   "customer success",
   "solutions architect", // usually pre-sales, not eng
   "manager, sales",
+  // "AI Infrastructure" / "ML Infrastructure" also shows up in non-engineering
+  // titles (supply chain, finance, ops) that build out the physical/vendor
+  // side of AI infra, not the software. Caught live in the first real import.
+  "supply chain",
+  "program manager",
+  "demand planning",
+  "capacity planning",
+  "procurement",
 ];
 
 // Keywords used to classify remote_type when the feed doesn't say explicitly.

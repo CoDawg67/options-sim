@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { roleSlugs } from "@/config/keywords";
-import { getAllActiveJobs, filterByRole, meetsListingThreshold } from "@/lib/data/jobs";
+import { getAllActiveJobs, getAllActiveJobsForStaticParams, filterByRole, meetsListingThreshold } from "@/lib/data/jobs";
 import { JobCard } from "@/components/JobCard";
 import { roleDisplayName } from "@/lib/role-display";
 
@@ -10,7 +10,7 @@ export const revalidate = 3600;
 export async function generateStaticParams() {
   // Pre-render only roles that currently clear the listing threshold — the
   // guard below still re-checks at request time in case counts drop.
-  const jobs = await getAllActiveJobs();
+  const jobs = await getAllActiveJobsForStaticParams();
   return Object.keys(roleSlugs)
     .filter((role) => meetsListingThreshold(filterByRole(jobs, role)))
     .map((role) => ({ role }));

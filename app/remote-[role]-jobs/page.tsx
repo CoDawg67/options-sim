@@ -1,14 +1,14 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { roleSlugs } from "@/config/keywords";
-import { getAllActiveJobs, filterByRole, filterByRemote, meetsListingThreshold } from "@/lib/data/jobs";
+import { getAllActiveJobs, getAllActiveJobsForStaticParams, filterByRole, filterByRemote, meetsListingThreshold } from "@/lib/data/jobs";
 import { JobCard } from "@/components/JobCard";
 import { roleDisplayName } from "@/lib/role-display";
 
 export const revalidate = 3600;
 
 export async function generateStaticParams() {
-  const jobs = await getAllActiveJobs();
+  const jobs = await getAllActiveJobsForStaticParams();
   return Object.keys(roleSlugs)
     .filter((role) => meetsListingThreshold(filterByRemote(filterByRole(jobs, role))))
     .map((role) => ({ role }));

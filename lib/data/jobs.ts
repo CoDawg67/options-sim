@@ -123,6 +123,20 @@ export function meetsListingThreshold(jobs: JobWithCompany[]): boolean {
   return jobs.length >= siteConfig.minListingsForCategoryPage;
 }
 
+// For generateStaticParams only: a transient Supabase hiccup during a
+// Vercel build shouldn't fail the whole deploy. Falling back to []
+// pre-renders nothing for that build, but dynamicParams defaults to true, so
+// every route still renders correctly on first real request (and gets
+// cached from then on) — the safe degradation is "slightly slower first
+// hit," not "broken deploy."
+export async function getAllActiveJobsForStaticParams(): Promise<JobWithCompany[]> {
+  try {
+    return await getAllActiveJobs();
+  } catch {
+    return [];
+  }
+}
+
 export async function getActiveCitiesWithCounts(): Promise<Array<{ city: string; count: number }>> {
   const jobs = await getAllActiveJobs();
   const counts = new Map<string, number>();

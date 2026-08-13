@@ -10,10 +10,18 @@ import { slugify } from "@/lib/importers/slug";
 export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const jobs = await getAllActiveJobs();
   const entries: MetadataRoute.Sitemap = [
     { url: siteConfig.domain, changeFrequency: "hourly", priority: 1 },
   ];
+
+  // A transient Supabase error shouldn't take the sitemap fully offline (or
+  // fail a build/prerender) — degrade to just the homepage rather than throw.
+  let jobs: Awaited<ReturnType<typeof getAllActiveJobs>>;
+  try {
+    jobs = await getAllActiveJobs();
+  } catch {
+    return entries;
+  }
 
   const companySlugs = new Set(jobs.map((j) => j.company.slug));
   for (const slug of companySlugs) {

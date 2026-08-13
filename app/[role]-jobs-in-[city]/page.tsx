@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { roleSlugs } from "@/config/keywords";
-import { getAllActiveJobs, filterByRole, filterByCity, meetsListingThreshold } from "@/lib/data/jobs";
+import { getAllActiveJobs, getAllActiveJobsForStaticParams, filterByRole, filterByCity, meetsListingThreshold } from "@/lib/data/jobs";
 import { JobCard } from "@/components/JobCard";
 import { roleDisplayName } from "@/lib/role-display";
 import { slugify } from "@/lib/importers/slug";
@@ -9,7 +9,7 @@ import { slugify } from "@/lib/importers/slug";
 export const revalidate = 3600;
 
 export async function generateStaticParams() {
-  const jobs = await getAllActiveJobs();
+  const jobs = await getAllActiveJobsForStaticParams();
   const params: Array<{ role: string; city: string }> = [];
 
   for (const role of Object.keys(roleSlugs)) {
